@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a1a">
+    <title>حاسبة المعدل التراكمي | A+ Protocol</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-cyan: #00f2fe;
+            --primary-blue: #0072ff;
+            --primary-pink: #ff0844;
+            --primary-gold: #fbbf24;
+            --text-light: #cbd5e1;
+            --text-white: #ffffff;
+            --glass-bg: rgba(20, 25, 40, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-hover: rgba(255, 255, 255, 0.12);
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background: #0a0a1a;
+            background-image: 
+                radial-gradient(ellipse at 20% 50%, rgba(0,114,255,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(0,242,254,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(255,8,68,0.04) 0%, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-light);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+        }
+
+        /* ========== MOBILE-FIRST: App Shell ========== */
+        .sidebar { display: none; }
+        
+        .main-content {
+            width: 100%; max-width: 700px; margin: 0 auto;
+            padding: 20px 16px; padding-bottom: calc(30px + var(--safe-bottom));
+            display: flex; flex-direction: column; gap: 16px;
+        }
+
+        /* ========== Mobile Header ========== */
+        .mobile-brand {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 8px 0 4px; color: var(--text-white);
+        }
+        .mobile-brand i { color: var(--primary-cyan); font-size: 1.5rem; filter: drop-shadow(0 0 8px rgba(0,242,254,0.5)); }
+        .mobile-brand span { font-size: 1.3rem; font-weight: 900; letter-spacing: -0.5px; }
+
+        .header { display: flex; flex-direction: column; gap: 14px; }
+        .header h1 {
+            color: var(--text-white); font-size: 1.15rem; font-weight: 700;
+            text-align: center; line-height: 1.6;
+        }
+        .header h1 i { color: var(--primary-cyan); margin-left: 6px; }
+        .actions-group { display: flex; gap: 10px; }
+
+        /* ========== Buttons ========== */
+        .btn {
+            padding: 12px 16px; border-radius: 14px; border: none;
+            font-size: 0.88rem; font-weight: 700; cursor: pointer;
+            transition: all 0.25s ease; display: flex; align-items: center;
+            justify-content: center; gap: 8px; flex: 1;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-cyan), var(--primary-blue));
+            color: #fff; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.25);
+        }
+        .btn-danger { background: rgba(239,68,68,0.12); color: #ff6b8a; border: 1px solid rgba(239,68,68,0.2); }
+        .btn-warning { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+
+        /* ========== First Semester Toggle ========== */
+        .first-semester-toggle {
+            display: flex; align-items: center; gap: 12px;
+            padding: 14px 16px; border-radius: 16px;
+            background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.15);
+            cursor: pointer; transition: all 0.3s; user-select: none;
+        }
+        .first-semester-toggle .toggle-switch {
+            width: 48px; height: 26px; border-radius: 13px; flex-shrink: 0;
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+            position: relative; transition: all 0.4s;
+        }
+        .first-semester-toggle .toggle-switch::after {
+            content: ''; width: 20px; height: 20px; border-radius: 50%;
+            background: #94a3b8; position: absolute;
+            top: 2px; right: 24px; transition: all 0.4s;
+        }
+        .first-semester-toggle.active .toggle-switch { background: rgba(34,197,94,0.4); border-color: var(--success); }
+        .first-semester-toggle.active .toggle-switch::after { right: 2px; background: var(--success); box-shadow: 0 0 10px rgba(34,197,94,0.5); }
+        .first-semester-toggle span { color: var(--text-light); font-weight: 500; font-size: 0.88rem; line-height: 1.5; }
+
+        /* ========== Glass Panel ========== */
+        .glass-panel {
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+        }
+
+        /* ========== Input Groups ========== */
+        .top-section { display: flex; flex-direction: column; gap: 14px; padding: 18px; }
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        .input-group label {
+            color: var(--text-white); font-weight: 600; font-size: 0.85rem;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .input-group label i { color: var(--primary-cyan); font-size: 0.8rem; }
+
+        .glass-input {
+            background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255,255,255,0.06);
+            padding: 14px 14px; border-radius: 14px; color: var(--text-white);
+            font-size: 1rem; transition: all 0.3s; outline: none;
+            -webkit-appearance: none; appearance: none; width: 100%;
+        }
+        .glass-input:focus { border-color: var(--primary-cyan); box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.08); }
+        .glass-input::placeholder { color: rgba(255,255,255,0.2); }
+        .glass-input:disabled { opacity: 0.3; cursor: not-allowed; }
+        select.glass-input { padding-right: 14px; }
+        select.glass-input option { background: #0f172a; color: white; }
+
+        /* ========== Courses Section ========== */
+        .courses-container { padding: 18px; }
+        .courses-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px; padding-bottom: 14px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .courses-header h2 {
+            color: var(--text-white); font-size: 1rem; font-weight: 700;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .courses-header h2 i { color: var(--primary-cyan); }
+        .courses-header .btn { flex: 0; padding: 10px 14px; font-size: 0.82rem; }
+
+        /* ========== Course Row — Simple, Clean, Works ========== */
+        .course-row {
+            display: flex; flex-direction: column; gap: 10px;
+            padding: 16px; margin-bottom: 12px;
+            background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px; position: relative;
+        }
+        .course-row-inputs {
+            display: flex; gap: 10px;
+        }
+        .course-row-inputs .glass-input { flex: 1; }
+
+        .remove-btn {
+            position: absolute; left: 10px; top: 10px;
+            background: rgba(239,68,68,0.15); border: none; color: #ff6b8a;
+            width: 32px; height: 32px; border-radius: 10px; display: flex;
+            align-items: center; justify-content: center; cursor: pointer;
+            font-size: 0.9rem; transition: all 0.25s;
+        }
+        .remove-btn:active { background: rgba(239,68,68,0.35); transform: scale(0.9); }
+
+        /* ========== Calculate Button ========== */
+        .calc-btn {
+            width: 100%; margin-top: 10px; justify-content: center;
+            font-size: 1.1rem; padding: 18px; border-radius: 18px;
+            background: linear-gradient(135deg, var(--primary-cyan), var(--primary-blue));
+            color: #fff; border: none; cursor: pointer; font-weight: 800;
+            display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 6px 25px rgba(0, 114, 255, 0.35);
+            transition: all 0.3s; position: relative; overflow: hidden;
+        }
+        .calc-btn:active { transform: scale(0.97); box-shadow: 0 2px 10px rgba(0,114,255,0.3); }
+
+        /* ========== Results ========== */
+        .results-section {
+            text-align: center; padding: 25px 18px;
+            display: none;
+        }
+        .results-section.active { display: block; animation: slideUp 0.5s ease; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .gpa-circle-wrapper { position: relative; width: 160px; height: 160px; margin: 0 auto 20px; }
+        .gpa-ring { width: 160px; height: 160px; transform: rotate(-90deg); }
+        .gpa-ring-bg { fill: none; stroke: rgba(255,255,255,0.05); stroke-width: 8; }
+        .gpa-ring-fill {
+            fill: none; stroke: url(#gpaGradient); stroke-width: 8;
+            stroke-linecap: round; stroke-dasharray: 440; stroke-dashoffset: 440;
+            transition: stroke-dashoffset 1.2s cubic-bezier(0.16,1,0.3,1);
+        }
+        .gpa-inner {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .gpa-label { color: var(--text-light); font-size: 0.8rem; margin-bottom: 2px; }
+        .gpa-value {
+            font-size: 2.5rem; font-weight: 900; color: var(--text-white);
+            text-shadow: 0 0 20px var(--primary-cyan); transition: all 0.5s;
+        }
+        .gpa-max { color: rgba(255,255,255,0.3); font-size: 0.75rem; }
+
+        .stats-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .stat-card {
+            background: rgba(255,255,255,0.03); padding: 16px; border-radius: 16px;
+            border: 1px solid var(--glass-border); display: flex;
+            justify-content: space-between; align-items: center;
+        }
+        .stat-card h4 { color: var(--text-light); font-size: 0.85rem; font-weight: 500; }
+        .stat-card h2 { color: var(--text-white); font-size: 1.4rem; font-weight: 800; }
+
+        .gpa-excellent { color: var(--success) !important; text-shadow: 0 0 15px rgba(34,197,94,0.5) !important; }
+        .gpa-good { color: var(--primary-cyan) !important; text-shadow: 0 0 15px rgba(0,242,254,0.5) !important; }
+        .gpa-average { color: var(--primary-gold) !important; text-shadow: 0 0 15px rgba(245,158,11,0.5) !important; }
+        .gpa-poor { color: var(--primary-pink) !important; text-shadow: 0 0 15px rgba(255,8,68,0.5) !important; }
+
+        .grade-badge {
+            display: inline-block; padding: 6px 20px; border-radius: 20px;
+            font-size: 1rem; font-weight: 700; margin-top: 8px;
+            border: 1px solid; animation: fadeIn 0.6s both;
+        }
+
+        .toggle-details {
+            background: transparent; color: var(--primary-cyan);
+            border: 1px solid rgba(0,242,254,0.25); padding: 10px 20px;
+            border-radius: 25px; cursor: pointer; margin-top: 20px;
+            transition: 0.3s; font-size: 0.88rem;
+        }
+        .details-content {
+            display: none; margin-top: 16px; text-align: right;
+            padding: 16px; background: rgba(0,0,0,0.25); border-radius: 14px;
+            font-size: 0.85rem; line-height: 2; border: 1px solid var(--glass-border);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ========== DESKTOP (992px+) ========== */
+        @media (min-width: 993px) {
+            body { display: flex; }
+            .mobile-brand { display: none; }
+            .sidebar {
+                display: flex; flex-direction: column; gap: 12px;
+                width: 280px; padding: 30px 20px;
+                border-right: 1px solid var(--glass-border);
+                background: rgba(10, 15, 30, 0.5);
+                backdrop-filter: blur(24px);
+                position: sticky; top: 0; height: 100vh; overflow-y: auto;
+            }
+            .brand {
+                display: flex; align-items: center; gap: 15px;
+                color: var(--text-white); font-size: 1.5rem; font-weight: 900;
+                margin-bottom: 35px; text-shadow: 0 0 15px rgba(0,242,254,0.5);
+            }
+            .brand i { color: var(--primary-cyan); font-size: 2rem; filter: drop-shadow(0 0 8px rgba(0,242,254,0.5)); }
+            .nav-item {
+                display: flex; align-items: center; gap: 15px;
+                padding: 14px 18px; border-radius: 14px;
+                color: var(--text-light); text-decoration: none;
+                transition: all 0.3s ease; cursor: pointer;
+                border: 1px solid transparent; font-size: 0.95rem;
+            }
+            .nav-item:hover, .nav-item.active {
+                background: var(--glass-hover); border-color: var(--glass-border);
+                color: var(--primary-cyan); transform: translateX(-5px);
+            }
+            .nav-item i { font-size: 1.1rem; width: 22px; text-align: center; }
+            .sidebar-footer {
+                margin-top: auto; padding-top: 20px;
+                border-top: 1px solid var(--glass-border); text-align: center;
+            }
+            .sidebar-footer p { font-size: 0.75rem; color: rgba(255,255,255,0.25); line-height: 1.6; }
+
+            .main-content {
+                flex: 1; max-width: 1000px; padding: 40px;
+                gap: 25px;
+            }
+            .header { flex-direction: row; justify-content: space-between; align-items: center; }
+            .header h1 { font-size: 1.8rem; text-align: right; }
+            .actions-group { flex: 0; }
+            .actions-group .btn { flex: 0; white-space: nowrap; }
+
+            .top-section { flex-direction: row; gap: 20px; padding: 25px; }
+            .top-section .input-group { flex: 1; }
+
+            .course-row {
+                flex-direction: row; align-items: center; gap: 12px;
+                padding: 10px; margin-bottom: 10px; border-radius: 14px;
+            }
+            .course-row .course-name { flex: 2; }
+            .course-row-inputs { flex: 2; }
+            .remove-btn {
+                position: static; width: 40px; height: 40px; flex-shrink: 0;
+                border-radius: 10px; background: transparent; color: rgba(255,75,114,0.5);
+            }
+            .remove-btn:hover { color: #ff4b72; background: rgba(255,8,68,0.1); }
+
+            .stats-grid { flex-direction: row; gap: 15px; }
+            .stat-card { flex: 1; flex-direction: column; text-align: center; padding: 20px; }
+            .stat-card h4 { margin-bottom: 8px; }
+
+            .gpa-circle-wrapper { width: 180px; height: 180px; }
+            .gpa-ring { width: 180px; height: 180px; }
+            .gpa-value { font-size: 2.8rem; }
+
+            .calc-btn { padding: 16px; font-size: 1.15rem; border-radius: 16px; }
+            .calc-btn:hover { box-shadow: 0 8px 35px rgba(0,114,255,0.5); transform: translateY(-2px); }
+        }
+
+        /* Custom Scrollbar (Desktop) */
+        @media (min-width: 993px) {
+            ::-webkit-scrollbar { width: 6px; }
+            ::-webkit-scrollbar-track { background: transparent; }
+            ::-webkit-scrollbar-thumb { background: rgba(0,242,254,0.3); border-radius: 3px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar (Desktop Only) -->
+    <div class="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>A+ Protocol</span>
+        </div>
+        <a class="nav-item active"><i class="fa-solid fa-calculator"></i> حاسبة المعدل</a>
+        <a class="nav-item"><i class="fa-solid fa-chart-line"></i> الأداء الأكاديمي</a>
+        <a class="nav-item"><i class="fa-solid fa-book"></i> سجل المقررات</a>
+        <a class="nav-item"><i class="fa-solid fa-bullseye"></i> المعدل المستهدف</a>
+        <a class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i> السجل السابق</a>
+        <div class="sidebar-footer">
+            <p>A+ Protocol v2.0<br>by The Shadow Engineer</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Mobile Brand -->
+        <div class="mobile-brand">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <span>A+ Protocol</span>
+        </div>
+
+        <div class="header">
+            <h1><i class="fa-solid fa-calculator"></i> حساب المعدل التراكمي والفصلي</h1>
+            <div class="actions-group">
+                <button class="btn btn-warning" onclick="clearGradesAndHours()"><i class="fa-solid fa-eraser"></i> تفريغ الدرجات</button>
+                <button class="btn btn-danger" onclick="resetEverything()"><i class="fa-solid fa-trash-can"></i> تصفير الكل</button>
+            </div>
+        </div>
+
+        <!-- First Semester Toggle -->
+        <div class="first-semester-toggle" id="firstSemesterToggle" onclick="toggleFirstSemester()">
+            <div class="toggle-switch"></div>
+            <span><i class="fa-solid fa-star" style="color: var(--primary-gold); margin-left: 5px;"></i> هذا أول فصل دراسي لي (بدون بيانات سابقة)</span>
+        </div>
+
+        <!-- Previous Data -->
+        <div class="glass-panel top-section" id="prevDataSection">
+            <div class="input-group">
+                <label><i class="fa-solid fa-chart-simple"></i> المعدل التراكمي السابق (من 4.00)</label>
+                <input type="text" inputmode="decimal" id="prevGPA" class="glass-input" placeholder="مثال: 3.1">
+            </div>
+            <div class="input-group">
+                <label><i class="fa-solid fa-hourglass-half"></i> عدد الساعات السابقة المنجزة</label>
+                <input type="text" inputmode="numeric" id="prevHours" class="glass-input" placeholder="مثال: 18 ساعة">
+            </div>
+            <div class="input-group">
+                <label><i class="fa-solid fa-circle-info"></i> النقاط السابقة (تلقائي)</label>
+                <input type="text" id="prevPointsDisplay" class="glass-input" disabled placeholder="يتم حسابها تلقائياً">
+            </div>
+        </div>
+
+        <!-- Current Semester Courses -->
+        <div class="glass-panel courses-container">
+            <div class="courses-header">
+                <h2><i class="fa-solid fa-book-open"></i> مقررات الفصل الحالي</h2>
+                <button class="btn btn-primary" onclick="addCourseRow()">
+                    <i class="fa-solid fa-plus"></i> إضافة مقرر
+                </button>
+            </div>
+            <div id="coursesList"></div>
+            <button class="calc-btn" onclick="calculateGPA()">
+                <i class="fa-solid fa-gears"></i> احسب المعدل النهائي
+            </button>
+        </div>
+
+        <!-- Results Panel -->
+        <div class="glass-panel results-section" id="resultsPanel">
+            <div class="gpa-circle-wrapper">
+                <svg class="gpa-ring" viewBox="0 0 160 160">
+                    <defs>
+                        <linearGradient id="gpaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#00f2fe"/>
+                            <stop offset="100%" stop-color="#0072ff"/>
+                        </linearGradient>
+                    </defs>
+                    <circle class="gpa-ring-bg" cx="80" cy="80" r="70"/>
+                    <circle class="gpa-ring-fill" id="gpaRing" cx="80" cy="80" r="70"/>
+                </svg>
+                <div class="gpa-inner">
+                    <div class="gpa-label">المعدل التراكمي</div>
+                    <div class="gpa-value" id="finalGPA">0.00</div>
+                    <div class="gpa-max">من 4.00</div>
+                </div>
+            </div>
+
+            <div id="gradeBadge"></div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h4><i class="fa-solid fa-chart-pie" style="color: var(--primary-pink);"></i> المعدل الفصلي</h4>
+                    <h2 id="semesterGPA" style="color: var(--primary-pink);">0.00</h2>
+                </div>
+                <div class="stat-card">
+                    <h4><i class="fa-solid fa-coins" style="color: var(--primary-gold);"></i> نقاط الترم</h4>
+                    <h2 id="semesterPoints" style="color: var(--primary-gold);">0</h2>
+                </div>
+                <div class="stat-card">
+                    <h4><i class="fa-solid fa-clock" style="color: var(--primary-cyan);"></i> إجمالي الساعات</h4>
+                    <h2 id="totalHours" style="color: var(--primary-cyan);">0</h2>
+                </div>
+            </div>
+
+            <button class="toggle-details" onclick="toggleDetails()">
+                <i class="fa-solid fa-list-check"></i> إظهار / إخفاء التفاصيل
+            </button>
+            <div class="details-content" id="detailsContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // ====== Arabic to English Numeral Converter ======
+        function toEnglishNumerals(str) {
+            const arabicMap = {'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'};
+            return String(str).replace(/[٠-٩]/g, d => arabicMap[d]);
+        }
+
+        function attachNumeralConverter(input) {
+            input.addEventListener('input', function() {
+                const pos = this.selectionStart;
+                this.value = toEnglishNumerals(this.value);
+                this.setSelectionRange(pos, pos);
+            });
+        }
+
+        // Grade Scale
+        const gradeScale = { 'A+': 4.00, 'A': 3.75, 'B+': 3.50, 'B': 3.00, 'C+': 2.50, 'C': 2.00, 'D+': 1.50, 'D': 1.00, 'F': 0.00 };
+
+        const coursesList = document.getElementById('coursesList');
+        let isFirstSemester = false;
+
+        // ====== Initialize ======
+        window.onload = () => {
+            attachNumeralConverter(document.getElementById('prevGPA'));
+            attachNumeralConverter(document.getElementById('prevHours'));
+            document.getElementById('prevGPA').addEventListener('input', updatePrevPoints);
+            document.getElementById('prevHours').addEventListener('input', updatePrevPoints);
+
+            const loaded = loadFromStorage();
+            if (!loaded) {
+                for (let i = 0; i < 6; i++) addCourseRow('');
+            }
+        };
+
+        function updatePrevPoints() {
+            const gpa = parseFloat(toEnglishNumerals(document.getElementById('prevGPA').value)) || 0;
+            const hrs = parseFloat(toEnglishNumerals(document.getElementById('prevHours').value)) || 0;
+            const pts = gpa * hrs;
+            document.getElementById('prevPointsDisplay').value = pts > 0 ? pts.toFixed(2) + ' نقطة' : '';
+        }
+
+        // ====== First Semester Toggle ======
+        function toggleFirstSemester() {
+            const toggle = document.getElementById('firstSemesterToggle');
+            const section = document.getElementById('prevDataSection');
+            isFirstSemester = !isFirstSemester;
+            toggle.classList.toggle('active', isFirstSemester);
+
+            if (isFirstSemester) {
+                section.style.opacity = '0.3';
+                section.style.pointerEvents = 'none';
+                document.getElementById('prevGPA').value = '';
+                document.getElementById('prevHours').value = '';
+                document.getElementById('prevPointsDisplay').value = '';
+            } else {
+                section.style.opacity = '1';
+                section.style.pointerEvents = 'auto';
+            }
+        }
+
+        // ====== Course Row ======
+        function addCourseRow(courseName = '') {
+            const row = document.createElement('div');
+            row.className = 'course-row';
+            row.innerHTML = `
+                <input type="text" class="glass-input course-name" placeholder="اسم المقرر" value="${courseName}">
+                <div class="course-row-inputs">
+                    <input type="text" inputmode="numeric" class="glass-input course-hours" placeholder="الساعات">
+                    <select class="glass-input course-grade">
+                        <option value="" disabled selected>الدرجة</option>
+                        <option value="A+">A+ ممتاز مرتفع</option>
+                        <option value="A">A ممتاز</option>
+                        <option value="B+">B+ جيد جداً مرتفع</option>
+                        <option value="B">B جيد جداً</option>
+                        <option value="C+">C+ جيد مرتفع</option>
+                        <option value="C">C جيد</option>
+                        <option value="D+">D+ مقبول مرتفع</option>
+                        <option value="D">D مقبول</option>
+                        <option value="F">F راسب</option>
+                    </select>
+                </div>
+                <button class="remove-btn" onclick="this.parentElement.remove(); saveToStorage();" title="حذف"><i class="fa-solid fa-xmark"></i></button>
+            `;
+            coursesList.appendChild(row);
+            attachNumeralConverter(row.querySelector('.course-hours'));
+        }
+
+        // ====== Actions ======
+        function clearGradesAndHours() {
+            document.querySelectorAll('.course-hours').forEach(i => i.value = '');
+            document.querySelectorAll('.course-grade').forEach(s => s.value = '');
+            hideResults();
+            saveToStorage();
+        }
+
+        function resetEverything() {
+            document.getElementById('prevGPA').value = '';
+            document.getElementById('prevHours').value = '';
+            document.getElementById('prevPointsDisplay').value = '';
+            coursesList.innerHTML = '';
+            for (let i = 0; i < 6; i++) addCourseRow('');
+            if (isFirstSemester) toggleFirstSemester();
+            hideResults();
+            try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+        }
+
+        function hideResults() { document.getElementById('resultsPanel').classList.remove('active'); }
+        function toggleDetails() {
+            const c = document.getElementById('detailsContent');
+            c.style.display = c.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // ====== GPA Color ======
+        function getGPAClass(gpa) {
+            if (gpa >= 3.50) return 'gpa-excellent';
+            if (gpa >= 2.50) return 'gpa-good';
+            if (gpa >= 1.50) return 'gpa-average';
+            return 'gpa-poor';
+        }
+
+        function getGPALabel(gpa) {
+            if (gpa >= 3.75) return { text: 'ممتاز', color: '#22c55e', bg: 'rgba(34,197,94,0.1)' };
+            if (gpa >= 3.50) return { text: 'ممتاز مرتفع', color: '#22c55e', bg: 'rgba(34,197,94,0.1)' };
+            if (gpa >= 3.00) return { text: 'جيد جداً', color: '#00f2fe', bg: 'rgba(0,242,254,0.1)' };
+            if (gpa >= 2.50) return { text: 'جيد', color: '#0072ff', bg: 'rgba(0,114,255,0.1)' };
+            if (gpa >= 2.00) return { text: 'مقبول', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' };
+            if (gpa >= 1.00) return { text: 'ضعيف', color: '#f97316', bg: 'rgba(249,115,22,0.1)' };
+            return { text: 'راسب', color: '#ef4444', bg: 'rgba(239,68,68,0.1)' };
+        }
+
+        // ====== Core Calculation ======
+        function calculateGPA() {
+            const prevGPA = isFirstSemester ? 0 : (parseFloat(toEnglishNumerals(document.getElementById('prevGPA').value)) || 0);
+            const prevHours = isFirstSemester ? 0 : (parseFloat(toEnglishNumerals(document.getElementById('prevHours').value)) || 0);
+            const prevPoints = prevGPA * prevHours;
+
+            let currentHours = 0, currentPoints = 0;
+            let details = `<strong style="color:var(--primary-cyan);">📋 تفاصيل العملية الحسابية:</strong><br><br>`;
+
+            if (!isFirstSemester && prevHours > 0) {
+                details += `<strong>البيانات السابقة:</strong><br>`;
+                details += `النقاط السابقة = ${prevGPA} × ${prevHours} = <strong>${prevPoints.toFixed(2)}</strong> نقطة.<br><br>`;
+            }
+
+            details += `<strong>مقررات الترم الحالي:</strong><br>`;
+
+            const rows = document.querySelectorAll('.course-row');
+            let hasValidCourse = false;
+
+            rows.forEach(row => {
+                const name = row.querySelector('.course-name').value || 'مقرر غير مسمى';
+                const hours = parseFloat(toEnglishNumerals(row.querySelector('.course-hours').value));
+                const grade = row.querySelector('.course-grade').value;
+
+                if (!isNaN(hours) && grade !== "") {
+                    hasValidCourse = true;
+                    const gp = gradeScale[grade];
+                    const pts = hours * gp;
+                    currentHours += hours;
+                    currentPoints += pts;
+                    details += `• ${name}: ${hours} ساعة × ${gp.toFixed(2)} (${grade}) = <strong>${pts.toFixed(2)}</strong> نقطة.<br>`;
+                }
+            });
+
+            if (!hasValidCourse) {
+                alert("الرجاء إدخال بيانات مقرر واحد على الأقل (الساعات والدرجة).");
+                return;
+            }
+
+            const semGPA = currentHours > 0 ? (currentPoints / currentHours) : 0;
+            const totalHours = prevHours + currentHours;
+            const totalPoints = prevPoints + currentPoints;
+            const cumGPA = totalHours > 0 ? (totalPoints / totalHours) : 0;
+
+            document.getElementById('semesterGPA').innerText = semGPA.toFixed(2);
+            document.getElementById('semesterPoints').innerText = currentPoints.toFixed(2);
+            document.getElementById('totalHours').innerText = totalHours;
+
+            const gpaEl = document.getElementById('finalGPA');
+            gpaEl.innerText = cumGPA.toFixed(2);
+            gpaEl.className = 'gpa-value ' + getGPAClass(cumGPA);
+
+            // Animate ring (r=70, circumference = 2*PI*70 ≈ 440)
+            const ring = document.getElementById('gpaRing');
+            const circumference = 2 * Math.PI * 70;
+            const offset = circumference - (cumGPA / 4) * circumference;
+            ring.style.strokeDashoffset = offset;
+
+            const gradStop1 = document.querySelector('#gpaGradient stop:first-child');
+            const gradStop2 = document.querySelector('#gpaGradient stop:last-child');
+            if (cumGPA >= 3.50) { gradStop1.setAttribute('stop-color', '#22c55e'); gradStop2.setAttribute('stop-color', '#16a34a'); }
+            else if (cumGPA >= 2.50) { gradStop1.setAttribute('stop-color', '#00f2fe'); gradStop2.setAttribute('stop-color', '#0072ff'); }
+            else if (cumGPA >= 1.50) { gradStop1.setAttribute('stop-color', '#fbbf24'); gradStop2.setAttribute('stop-color', '#f59e0b'); }
+            else { gradStop1.setAttribute('stop-color', '#ff0844'); gradStop2.setAttribute('stop-color', '#ef4444'); }
+
+            const label = getGPALabel(cumGPA);
+            document.getElementById('gradeBadge').innerHTML = `<span class="grade-badge" style="color:${label.color}; background:${label.bg}; border-color:${label.color};">${label.text}</span>`;
+
+            details += `<br><strong style="color:var(--primary-cyan);">📊 المحصلة النهائية:</strong><br>`;
+            details += `إجمالي النقاط = ${prevPoints.toFixed(2)} + ${currentPoints.toFixed(2)} = <strong>${totalPoints.toFixed(2)}</strong> نقطة.<br>`;
+            details += `إجمالي الساعات = ${prevHours} + ${currentHours} = <strong>${totalHours}</strong> ساعة.<br>`;
+            details += `المعدل التراكمي = ${totalPoints.toFixed(2)} ÷ ${totalHours} = <strong style="color:${label.color};">${cumGPA.toFixed(2)}</strong>`;
+            document.getElementById('detailsContent').innerHTML = details;
+
+            document.getElementById('resultsPanel').classList.add('active');
+            setTimeout(() => {
+                document.getElementById('resultsPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+
+            saveToStorage();
+        }
+
+        // ====== localStorage ======
+        const STORAGE_KEY = 'aplus_gpa_data';
+
+        function saveToStorage() {
+            const data = {
+                prevGPA: document.getElementById('prevGPA').value,
+                prevHours: document.getElementById('prevHours').value,
+                isFirstSemester: isFirstSemester,
+                courses: []
+            };
+            document.querySelectorAll('.course-row').forEach(row => {
+                data.courses.push({
+                    name: row.querySelector('.course-name').value,
+                    hours: row.querySelector('.course-hours').value,
+                    grade: row.querySelector('.course-grade').value
+                });
+            });
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+        }
+
+        function loadFromStorage() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return false;
+                const data = JSON.parse(raw);
+
+                if (data.prevGPA) document.getElementById('prevGPA').value = data.prevGPA;
+                if (data.prevHours) document.getElementById('prevHours').value = data.prevHours;
+                updatePrevPoints();
+
+                if (data.isFirstSemester && !isFirstSemester) toggleFirstSemester();
+
+                if (data.courses && data.courses.length > 0) {
+                    coursesList.innerHTML = '';
+                    data.courses.forEach(c => {
+                        addCourseRow(c.name || '');
+                        const rows = coursesList.querySelectorAll('.course-row');
+                        const lastRow = rows[rows.length - 1];
+                        if (c.hours) lastRow.querySelector('.course-hours').value = c.hours;
+                        if (c.grade) lastRow.querySelector('.course-grade').value = c.grade;
+                    });
+                }
+                return true;
+            } catch(e) { return false; }
+        }
+
+        document.addEventListener('input', () => { saveToStorage(); });
+        document.addEventListener('change', () => { saveToStorage(); });
+    </script>
+</body>
+</html>
